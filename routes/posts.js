@@ -1,10 +1,10 @@
 const { Router } = require('express');
-const Post=require('../models/Post');
+const db = require('../models');
 
 const router=Router();
 
 router.post('/post', async (req,res)=>{
-    const post = await Post.create({
+    const post = await db.Post.create({
         title: req.body.title,
         content: req.body.content,
         uid:req.body.uid
@@ -15,13 +15,30 @@ router.post('/post', async (req,res)=>{
 })
 
 router.get('/post', async (req,res)=>{
-    const posts = await Post.findAll({order: [['createdAt', 'DESC']]});
+  let where = {}
 
+  if (req.query.id) {
+    where = {
+      uid: req.query.id,
+      flag:false
+    }
+  }else{
+    where = {
+      flag:true
+    }
+  }
+  console.log("in flag scene")
+  
+    const posts = await db.Post.findAll({
+      order: [['createdAt', 'DESC']],
+      where:where
+    });
+    
     res.status(200).send(posts);
 })
 
 router.put('/post', async (req,res)=>{
-    const posts = await Post.update({ 
+    const posts = await db.Post.update({ 
         title: req.body.title,
         content:req.body.content,
      }, {
@@ -35,8 +52,25 @@ router.put('/post', async (req,res)=>{
     res.status(200).send(posts);
 });
 
+router.put('/dPost', async (req,res)=>{
+  const posts = await db.Post.update({ 
+      flag:false
+   }, {
+      where: {
+        id: req.body.id
+      }
+    });
+
+
+
+  res.status(200).send(posts);
+});
+
+
+
+
 router.delete('/post',async (req,res)=>{
-    const posts = await Post.destroy({
+    const posts = await db.Post.destroy({
         where: {
           id: req.query.id
         }

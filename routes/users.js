@@ -1,26 +1,38 @@
 const { Router } = require('express');
 const router=Router();
-const db=require('../config/database');
-const User=require('../models/User');
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
-
+const { Sequelize } = require('../config/database');
+const User=require('../models/user');
+const db = require('../models');
+const cookieParser = require('cookie-parser')
 
 dotenv.config({ path: "./config.env" });
 
 
-
-
 router.post('/register', async (req,res)=>{
-    const user = await User.create({
-        firstname: req.body.fname,
-        lastname: req.body.lname,
-        email:req.body.email,
-        password:req.body.password,
-      });
-     
-      console.log(user.toJSON()); 
-    res.status(200).send({msg:"hello"});
+    try{
+            const userExist = await db.User.findOne({ email:req.body.email });
+        
+            if (userExist) {
+              return res.status(422).json({ error: "Email already Exist" });
+            }  
+            else {
+                const user = await db.User.create({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    email:req.body.email,
+                    password:req.body.password,
+                });
+        
+                console.log(user.toJSON()); 
+                res.status(200).send({msg:"hello"});
+           }
+    }
+    catch(err)
+    {
+        res.status(400).json({error:err});
+    }
       
    
 }
@@ -33,7 +45,7 @@ router.get('/signIn', async (req,res)=>{
         if (!email || !password) {
           return res.status(400).json({ error: "Plz filled the data" });
         }
-        const user = await User.findOne({
+        const user = await db.User.findOne({
             where:{
                 email:email,
                 password:password,
@@ -64,14 +76,27 @@ router.get('/signIn', async (req,res)=>{
 });
 
 router.get('/user', async (req,res)=>{
-    const user = await User.findOne({
+    const user = await db.User.findOne({
         where:{
             id:req.query.id
         }
     });
      
-      console.log(user.toJSON()); 
     res.status(200).send(user);
+      
+   
+});
+
+router.get('/logout', async (req,res)=>{
+  
+    
+    let token = jwt.sign({ id: '123' }, process.env.SECRET_KEY);
+
+    res.cookie("jwwwtoken", token, {
+        expires: new Date(Date.now() + 25892000000),
+        httpOnly: false,
+      });
+      res.status(200).json({message: "Logout removed cookie" });
       
    
 });

@@ -23,7 +23,6 @@ app.use(express.json());
 
 app.use(require('./routes/users'));
 app.use(require('./routes/posts'));
-app.use(require('./routes/draftPosts'));
 
 app.get("/", (req, res) => {
   res.send("homee page");
