@@ -3,13 +3,13 @@ const router=Router();
 const userController=require('../controllers/userController');
 
 
-router.post('/register',userController.userRegister);
+router.post('/register',userController.register);
 
-router.get('/signIn', userController.userLogin);
+router.get('/signIn', userController.login);
 
-router.get('/user',userController.userFind);
+router.get('/user',userController.find);
 
-router.get('/logout', userController.userLogout);
+router.get('/logout', userController.logout);
 
 
 

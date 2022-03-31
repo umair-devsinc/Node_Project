@@ -1,85 +1,113 @@
-const db = require('../models');
+const db = require("../models");
 
-const postCreate=async (req,res)=>{
+const post = async (req, res) => {
+  try {
+    const { title, content, flag, uid } = req.body;
+
     const post = await db.Post.create({
-        title: req.body.title,
-        content: req.body.content,
-        uid:req.body.uid
-      });
-     
-      console.log(post.toJSON()); 
-    res.status(200).send({msg:"hello"});
-}
-
-const postGet=async (req,res)=>{
-  let where = {}
-
-  if (req.query.id) {
-    where = {
-      uid: req.query.id,
-      flag:false
-    }
-  }else{
-    where = {
-      flag:true
-    }
+      title: title,
+      content: content,
+      flag: flag,
+      uid: uid,
+    });
+    res.status(200).json({ msg: "post saved" });
+  } catch (err) {
+    res.status(400).json({ error: err });
   }
-  console.log("in flag scene")
-  
+};
+
+const get = async (req, res) => {
+  try {
+    let conditions = req.query.id
+      ? {
+          uid: req.query.id,
+          flag: false,
+        }
+      : {
+          flag: true,
+        };
+
     const posts = await db.Post.findAll({
-      order: [['createdAt', 'DESC']],
-      where:where
+      order: [["createdAt", "DESC"]],
+      where: conditions,
     });
-    
-    res.status(200).send(posts);
-}
 
-const postEdit=async (req,res)=>{
-    const posts = await db.Post.update({ 
-        title: req.body.title,
-        content:req.body.content,
-     }, {
+    res.status(200).send(posts);
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
+
+const singlePost = async (req, res) => {
+  try {
+    const posts = await db.Post.findOne({
+      where: { id: req.params["id"] },
+    });
+
+    res.status(200).send(posts);
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
+
+const edit = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+
+    const posts = await db.Post.update(
+      {
+        title: title,
+        content: content,
+      },
+      {
         where: {
-          id: req.params['id']
-        }
-      });
-
-
-
-    res.status(200).send(posts);
-}
-
-const postDraft=async (req,res)=>{
-  const posts = await db.Post.update({ 
-      flag:req.params['flag']
-   }, {
-      where: {
-        id: req.params['id']
+          id: req.params["id"],
+        },
       }
-    });
+    );
+    res.status(200).send(posts);
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
 
-
-
-  res.status(200).send(posts);
-}
-
-
-
-
-const postDelete=async (req,res)=>{
-    const posts = await db.Post.destroy({
+const draft = async (req, res) => {
+  try {
+    const posts = await db.Post.update(
+      {
+        flag: req.params["flag"],
+      },
+      {
         where: {
-          id: req.query.id
-        }
-      });
+          id: req.params["id"],
+        },
+      }
+    );
+    res.status(200).send(posts);
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
+
+const deletee = async (req, res) => {
+  try {
+    const posts = await db.Post.destroy({
+      where: {
+        id: req.query.id,
+      },
+    });
 
     res.status(200).send("deleted");
-}
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
 
-module.exports={
-    postCreate,
-    postGet,
-    postEdit,
-    postDraft,
-    postDelete
-}
+module.exports = {
+  post,
+  get,
+  edit,
+  draft,
+  deletee,
+  singlePost,
+};

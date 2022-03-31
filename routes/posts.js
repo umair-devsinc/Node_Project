@@ -1,18 +1,20 @@
-const { Router } = require('express');
-const db = require('../models');
-const postController=require('../controllers/postController');
+const { Router } = require("express");
+const db = require("../models");
+const postController = require("../controllers/postController");
+const auth = require("../middleware/auth");
 
-const router=Router();
+const router = Router();
 
-router.post('/post',postController.postCreate);
+router.post("/post", auth, postController.post);
 
-router.get('/post',postController.postGet);
+router.get("/post", postController.get);
 
-router.put('/post/:id',postController.postEdit);
+router.get("/singlePost/:id", postController.singlePost);
 
-router.put('/dPost/:id/:flag', postController.postDraft);
+router.put("/post/:id", postController.edit);
 
-router.delete('/post',postController.postDelete);
+router.put("/dPost/:id/:flag", auth, postController.draft);
 
+router.delete("/post", postController.deletee);
 
-module.exports=router;
+module.exports = router;
