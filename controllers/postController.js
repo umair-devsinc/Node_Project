@@ -29,10 +29,40 @@ const get = async (req, res) => {
 
     const posts = await db.Post.findAll({
       order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: db.Comment,
+          include: [db.User],
+          required: false,
+        },
+      ],
       where: conditions,
+      offset: req.params["offset"],
+      limit: 2,
     });
 
     res.status(200).send(posts);
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
+
+const count = async (req, res) => {
+  try {
+    let conditions = req.query.id
+      ? {
+          uid: req.query.id,
+          flag: false,
+        }
+      : {
+          flag: true,
+        };
+
+    const postCount = await db.Post.count({
+      where: conditions,
+    });
+
+    res.status(200).send({ count: postCount });
   } catch (err) {
     res.status(400).json({ error: err });
   }
@@ -42,6 +72,13 @@ const singlePost = async (req, res) => {
   try {
     const posts = await db.Post.findOne({
       where: { id: req.params["id"] },
+      include: [
+        {
+          model: db.Comment,
+          include: [db.User],
+          required: false,
+        },
+      ],
     });
 
     res.status(200).send(posts);
@@ -110,4 +147,5 @@ module.exports = {
   draft,
   deletee,
   singlePost,
+  count,
 };
